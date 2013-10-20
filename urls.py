@@ -7,7 +7,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 
-lap_resource = LapResource()
+#lap_resource = LapResource()
 
 v1_api = Api(api_name='v1')
 v1_api.register(TrialResultResource())

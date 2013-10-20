@@ -1,0 +1,1 @@
+ curl --dump-header - -X POST -H "Content-Type: application/json"  http://localhost:8000/py/api/v1/lap/?format=json -d '{"lap_nr": 1, "penalty": "11:08:26", "penalty_value": "22", "time": "11:08:25", "startnumber":"12"}'

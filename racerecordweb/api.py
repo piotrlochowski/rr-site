@@ -76,9 +76,9 @@ class CarResource(ModelResource):
 
 class TrialResultResource(ModelResource):
     laps = fields.ToManyField('racerecordweb.api.LapResource', 'laps', full=True)
-    driver = fields.ForeignKey(DriverResource, 'driver', full=True)
-    trial = fields.ForeignKey(TrialResource, 'trial', full=True)
-    car = fields.ForeignKey(CarResource, 'car', full=True)
+    driver = fields.ForeignKey(DriverResource, 'driver', full=True, null=True)
+    trial = fields.ForeignKey(TrialResource, 'trial', full=True, null=True)
+    car = fields.ForeignKey(CarResource, 'car', full=True, null=True)
 
     class Meta:
         queryset = TrialResult.objects.all()
@@ -114,8 +114,10 @@ class LapResource(ModelResource):
         }
 
     def hydrate(self, bundle):
-        objects_filter = TrialResult.objects.filter(startnumber=bundle.data['startnumber'])
-        bundle.obj.trial_result_id = 14
+        trial = Trial.objects.get(id=bundle.data['trial_id'])
+        (tr, isNew) = TrialResult.objects.get_or_create(startnumber=bundle.data['startnumber'], trial__id=bundle.data['trial_id'], defaults={'trial': trial})
+        #objects_filter = TrialResult.objects.filter(startnumber=bundle.data['startnumber'], trial__id=bundle.data['trial_id'])[0]
+        bundle.obj.trial_result_id = tr.id
         del bundle.data['startnumber']
         return bundle
 

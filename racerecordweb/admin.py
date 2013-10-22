@@ -54,9 +54,15 @@ class EventDriveAdmin(admin.ModelAdmin):
     ]
 
 
+class TrialAdmin(admin.ModelAdmin):
+    inlines = [
+        LapInline,
+    ]
+
+
 admin.site.register(models.Driver, DriverAdmin)
 admin.site.register(models.Car)
-admin.site.register(models.Trial)
+admin.site.register(models.Trial, TrialAdmin)
 admin.site.register(models.EventDriver, EventDriveAdmin)
 admin.site.register(models.Lap)
 admin.site.register(models.Event, EventAdmin)

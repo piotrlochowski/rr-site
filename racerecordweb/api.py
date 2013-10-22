@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth.models import User
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
@@ -117,11 +118,14 @@ class LapResource(ModelResource):
 
 
     def hydrate(self, bundle):
-        #trial = Trial.objects.get(id=bundle.data['trial_id'])
+        (min, sec, msec) = [int(t) for t in bundle.data['time'].split(':')]
+        bundle.data['time'] = int((datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
+        trial = Trial.objects.get(id=bundle.data['trial_id'])
         event_driver = EventDriver.objects.get(event__id=bundle.data['event_id'],
-                                               start_number=bundle.data['start_number'])
+                                                   start_number=bundle.data['start_number'])
         #bundle.obj.lap_nr = bundle.data['lap_nr']
         bundle.obj.event_driver = event_driver
+        bundle.obj.trial = trial
         del bundle.data['event_id']
         del bundle.data['trial_id']
         del bundle.data['start_number']

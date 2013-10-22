@@ -69,10 +69,11 @@ class Trial(models.Model):
 
 class Lap(models.Model):
     lap_nr = models.IntegerField()
-    time = models.TimeField()
+    time = models.IntegerField()
     penalty = models.SmallIntegerField(null=True, blank=True, default=None)
     penalty_value = models.BigIntegerField(null=True, blank=True, default=None)
     event_driver = models.ForeignKey(EventDriver, related_name='laps')
+    trial = models.ForeignKey(Trial, related_name='laps')
 
     def __unicode__(self):
         return u'%d uzyska³ %s na %d przeje¼dzie' % (self.event_driver.start_number, self.time, self.lap_nr)

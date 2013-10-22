@@ -53,7 +53,7 @@ class TrialResult(models.Model):
     #laps = models.OneToOneField(Lap)
 
     def __unicode__(self):
-        return u'Przejazdy nr %s na próbie %s' % (self.startnumber, self.trial.name)
+        return u'Zaloga nr %s na próbie %s uzyskala najlepszy czas %s' % (self.startnumber, self.trial.name, self.besttime)
 
 
 class Lap(models.Model):

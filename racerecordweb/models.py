@@ -16,11 +16,11 @@ class Driver(models.Model):
 
 class Event(models.Model):
     id = models.AutoField(primary_key=True)
-    city = models.CharField('Wydarzenie', max_length=20)
-    drivers = models.ManyToManyField(Driver, related_name='drivers', null=True, blank=True, default=None)
+    name = models.CharField('Wydarzenie', max_length=20)
+    drivers = models.ManyToManyField(Driver, related_name='events', null=True, blank=True, default=None, through='EventDriver')
 
     def __unicode__(self):
-        return u'%s' % (self.city)
+        return u'%s' % (self.name)
 
 
 class Car(models.Model):
@@ -36,6 +36,17 @@ class Car(models.Model):
         return u'%s z %s nr rej. %s' % (self.name, self.year, self.plate)
 
 
+class EventDriver(models.Model):
+    id = models.AutoField(primary_key=True)
+    event = models.ForeignKey(Event)
+    driver = models.ForeignKey(Driver)
+    car = models.ForeignKey(Car, null=True, blank=True, default=None)
+    start_number = models.SmallIntegerField()
+
+    def __unicode__(self):
+        return u'%s %s na %s' % (self.driver.last_name, self.driver.first_name, self.event.name)
+
+
 class Trial(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
@@ -45,28 +56,25 @@ class Trial(models.Model):
         return u'%s' % (self.name)
 
 
-class TrialResult(models.Model):
-    id = models.AutoField(primary_key=True)
-    trial = models.ForeignKey(Trial)
-    besttime = models.TimeField(null=True, blank=True)
-    startnumber = models.IntegerField()
-    driver = models.ForeignKey(Driver, null=True, blank=True, default=None)
-    car = models.ForeignKey(Car, null=True, blank=True, default=None)
+#class TrialResult(models.Model):
+#    id = models.AutoField(primary_key=True)
+    #trial = models.ForeignKey(Trial)
+    #best_time = models.TimeField(null=True, blank=True)
+    #driver = models.ForeignKey(Driver, null=True, blank=True, default=None)
     #laps = models.OneToOneField(Lap)
 
-    def __unicode__(self):
-        return u'Zaloga nr %s na próbie %s uzyskala najlepszy czas %s' % (self.startnumber, self.trial.name, self.besttime)
+    #def __unicode__(self):
+    #    return u'Zaloga nr %s na próbie %s uzyskala najlepszy czas %s' % (self.startnumber, self.trial.name, self.besttime)
 
 
 class Lap(models.Model):
-    id = models.AutoField(primary_key=True)
     lap_nr = models.IntegerField()
     time = models.TimeField()
-    penalty = models.TimeField('Time sanction value')
-    penalty_value = models.CharField(max_length=10)
-    trial_result = models.ForeignKey(TrialResult, related_name='laps')
+    penalty = models.SmallIntegerField(null=True, blank=True, default=None)
+    penalty_value = models.BigIntegerField(null=True, blank=True, default=None)
+    event_driver = models.ForeignKey(EventDriver, related_name='laps')
 
     def __unicode__(self):
-        return u'%d uzyska³ %s na %d przeje¼dzie' % (self.trial_result.startnumber, self.time, self.lap_nr)
+        return u'%d uzyska³ %s na %d przeje¼dzie' % (self.event_driver.start_number, self.time, self.lap_nr)
 
     #return u'%d:Sd:sd' %(self.time)

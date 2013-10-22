@@ -1,13 +1,13 @@
 from django.contrib.auth.models import User
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL,ALL_WITH_RELATIONS
-from racerecordweb.models import Lap, TrialResult, Trial, Location, Driver, Car
+from racerecordweb.models import Lap, TrialResult, Trial, Event, Driver, Car
 from tastypie.authorization import Authorization
 import copy
 
 class LocationResource(ModelResource):
     class Meta:
-        queryset = Location.objects.all();
+        queryset = Event.objects.all();
         resource_name = 'location'
         include_resource_uri = False
         

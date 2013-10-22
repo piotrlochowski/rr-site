@@ -7,10 +7,20 @@ class Driver(models.Model):
     id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
     #cars = models.ForeignKey(Car)
 
     def __unicode__(self):
         return u'%s %s' % (self.last_name, self.first_name)
+
+
+class Event(models.Model):
+    id = models.AutoField(primary_key=True)
+    city = models.CharField('Wydarzenie', max_length=20)
+    drivers = models.ManyToManyField(Driver, related_name='drivers', null=True, blank=True, default=None)
+
+    def __unicode__(self):
+        return u'%s' % (self.city)
 
 
 class Car(models.Model):
@@ -26,18 +36,10 @@ class Car(models.Model):
         return u'%s z %s nr rej. %s' % (self.name, self.year, self.plate)
 
 
-class Location(models.Model):
-    id = models.AutoField(primary_key=True)
-    city = models.CharField('Miejscowosc', max_length=20)
-
-    def __unicode__(self):
-        return u'%s' % (self.city)
-
-
 class Trial(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    location = models.ForeignKey(Location)
+    event = models.ForeignKey(Event, related_name='trials')
 
     def __unicode__(self):
         return u'%s' % (self.name)

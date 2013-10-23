@@ -1,5 +1,6 @@
 import datetime
 from django.contrib.auth.models import User
+from django.db.models import Min, Sum, Max
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from racerecordweb.models import Lap, Trial, Event, Driver, Car, EventDriver
@@ -28,6 +29,7 @@ class DriverResource(ModelResource):
     class Meta:
         queryset = Driver.objects.all();
         resource_name = 'driver'
+        fields = ['last_name', 'first_name']
         include_resource_uri = False
 
     def alter_list_data_to_serialize(self, request, data_dict):
@@ -81,19 +83,37 @@ class CarResource(ModelResource):
 
 
 class EventDriverResource(ModelResource):
-    #laps = fields.ToManyField('racerecordweb.api.LapResource', 'laps', full=True, null=True)
+    #laps = fields.ToManyField(LapResource, 'laps', related_name="lap", full=True, null=True)
     driver = fields.ForeignKey(DriverResource, 'driver', full=True, null=True)
     event = fields.ForeignKey(EventResource, 'event', full=True, null=True)
 
     class Meta:
         queryset = EventDriver.objects.all()
         resource_name = 'event_driver'
-        excludes = ['id']
-        include_resource_uri = True
+        #excludes = ['id']
+        include_resource_uri = False
         authorization = Authorization()
         filtering = {
             'driver': ['first_name', 'last_name'],
         }
+
+    def dehydrate(self, bundle):
+        #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,
+        #                          event_driver__driver__id=bundle.obj.driver.id)
+        #times = Lap.objects.aggregate(Sum('time'), Min('time'), Max('time'))
+
+        #aggregate(Avg('price'), Max('price'), Min('price'))
+
+        #bundle.data['time_n-1'] = times['time__sum']-times['time__min']
+        #bundle.data['time_best'] = times['time__max']
+
+        times = bundle.obj.laps.all().aggregate(Sum('time'), Min('time'), Max('time'))
+
+        bundle.data['time_n-1'] = times['time__sum']-times['time__min']
+        bundle.data['time_best'] = times['time__max']
+        del bundle.data['id']
+        del bundle.data['event']
+        return bundle
 
     def alter_list_data_to_serialize(self, request, data_dict):
         if isinstance(data_dict, dict):
@@ -107,7 +127,8 @@ class EventDriverResource(ModelResource):
 
 
 class LapResource(ModelResource):
-    event_driver = fields.ForeignKey(EventDriverResource, 'event_driver')
+    event_driver = fields.ForeignKey(EventDriverResource, 'event_driver', related_name='laps')
+    #trial = fields.ForeignKey(Trial, 'trial', related_name='laps')
 
     class Meta:
         queryset = Lap.objects.all()
@@ -119,10 +140,11 @@ class LapResource(ModelResource):
 
     def hydrate(self, bundle):
         (min, sec, msec) = [int(t) for t in bundle.data['time'].split(':')]
-        bundle.data['time'] = int((datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
+        bundle.data['time'] = int(
+            (datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
         trial = Trial.objects.get(id=bundle.data['trial_id'])
         event_driver = EventDriver.objects.get(event__id=bundle.data['event_id'],
-                                                   start_number=bundle.data['start_number'])
+                                               start_number=bundle.data['start_number'])
         #bundle.obj.lap_nr = bundle.data['lap_nr']
         bundle.obj.event_driver = event_driver
         bundle.obj.trial = trial

@@ -1,5 +1,6 @@
 BEGIN;
 DROP TABLE "racerecordweb_lap";
+DROP TABLE "racerecordweb_trialdriver";
 DROP TABLE "racerecordweb_trial";
 DROP TABLE "racerecordweb_eventdriver";
 DROP TABLE "racerecordweb_car";
@@ -40,6 +41,14 @@ CREATE TABLE "racerecordweb_trial" (
     "event_id" integer NOT NULL REFERENCES "racerecordweb_event" ("id") DEFERRABLE INITIALLY DEFERRED
 )
 ;
+CREATE TABLE "racerecordweb_trialdriver" (
+    "id" serial NOT NULL PRIMARY KEY,
+    "trial_id" integer NULL REFERENCES "racerecordweb_trial" ("id") DEFERRABLE INITIALLY DEFERRED,
+    "driver_id" integer NULL REFERENCES "racerecordweb_driver" ("id") DEFERRABLE INITIALLY DEFERRED,
+    "car_id" integer REFERENCES "racerecordweb_car" ("id") DEFERRABLE INITIALLY DEFERRED,
+    "start_number" smallint NOT NULL
+)
+;
 CREATE TABLE "racerecordweb_lap" (
     "id" serial NOT NULL PRIMARY KEY,
     "lap_nr" integer NOT NULL,
@@ -47,6 +56,7 @@ CREATE TABLE "racerecordweb_lap" (
     "penalty" smallint,
     "penalty_value" bigint,
     "event_driver_id" integer NOT NULL REFERENCES "racerecordweb_eventdriver" ("id") DEFERRABLE INITIALLY DEFERRED,
+    "trial_driver_id" integer REFERENCES "racerecordweb_trialdriver" ("id") DEFERRABLE INITIALLY DEFERRED,
     "trial_id" integer NOT NULL REFERENCES "racerecordweb_trial" ("id") DEFERRABLE INITIALLY DEFERRED
 )
 ;
@@ -55,6 +65,10 @@ CREATE INDEX "racerecordweb_eventdriver_event_id" ON "racerecordweb_eventdriver"
 CREATE INDEX "racerecordweb_eventdriver_driver_id" ON "racerecordweb_eventdriver" ("driver_id");
 CREATE INDEX "racerecordweb_eventdriver_car_id" ON "racerecordweb_eventdriver" ("car_id");
 CREATE INDEX "racerecordweb_trial_event_id" ON "racerecordweb_trial" ("event_id");
+CREATE INDEX "racerecordweb_trialdriver_trial_id" ON "racerecordweb_trialdriver" ("trial_id");
+CREATE INDEX "racerecordweb_trialdriver_driver_id" ON "racerecordweb_trialdriver" ("driver_id");
+CREATE INDEX "racerecordweb_trialdriver_car_id" ON "racerecordweb_trialdriver" ("car_id");
 CREATE INDEX "racerecordweb_lap_event_driver_id" ON "racerecordweb_lap" ("event_driver_id");
+CREATE INDEX "racerecordweb_lap_trial_driver_id" ON "racerecordweb_lap" ("trial_driver_id");
 CREATE INDEX "racerecordweb_lap_trial_id" ON "racerecordweb_lap" ("trial_id");
 COMMIT;

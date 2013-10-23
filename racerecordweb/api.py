@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Min, Sum, Max
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
-from racerecordweb.models import Lap, Trial, Event, Driver, Car, EventDriver
+from racerecordweb.models import Lap, Trial, Event, Driver, Car, EventDriver, TrialDriver
 from tastypie.authorization import Authorization
 import copy
 
@@ -45,6 +45,9 @@ class DriverResource(ModelResource):
 
 class TrialResource(ModelResource):
     event = fields.ForeignKey(EventResource, 'event')
+    filtering = {
+        'id': ALL,
+    }
 
     class Meta:
         queryset = Trial.objects.all()
@@ -107,12 +110,15 @@ class EventDriverResource(ModelResource):
         #bundle.data['time_n-1'] = times['time__sum']-times['time__min']
         #bundle.data['time_best'] = times['time__max']
 
+        _n_1 = 0
+        _max = 0
         for trial in bundle.obj.event.trials.all():
             times = bundle.obj.laps.filter(trial__id=trial.id).aggregate(Sum('time'), Min('time'), Max('time'))
             if times['time__min'] and times['time__max'] and times['time__sum']:
-                bundle.data['time_n-1'] = times['time__sum']-times['time__min']
-                bundle.data['time_best'] = times['time__max']
-                bundle.data['trials']='[{"trial_id":"1"},{"trial_id":"1"}]'
+                _n_1 += times['time__sum'] - times['time__min']
+                _max += times['time__max']
+        bundle.data['time_n-1'] = _n_1
+        bundle.data['time_best'] = _max
 
         del bundle.data['id']
         del bundle.data['event']
@@ -125,6 +131,55 @@ class EventDriverResource(ModelResource):
                 del (data_dict['meta'])
                 # Rename the objects.
                 data_dict['event_driver'] = copy.copy(data_dict['objects'])
+                del (data_dict['objects'])
+        return data_dict
+
+
+class TrialDriverResource(ModelResource):
+    #laps = fields.ToManyField(LapResource, 'laps', related_name="lap", full=True, null=True)
+    driver = fields.ForeignKey(DriverResource, 'driver', full=True, null=True)
+    trial = fields.ForeignKey(TrialResource, 'trial', full=True, null=True)
+
+    class Meta:
+        queryset = TrialDriver.objects.all()
+        resource_name = 'trial_driver'
+        #excludes = ['id']
+        include_resource_uri = False
+        authorization = Authorization()
+        filtering = {
+            'trial': ALL_WITH_RELATIONS,
+        }
+
+    def dehydrate(self, bundle):
+        #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,
+        #                          event_driver__driver__id=bundle.obj.driver.id)
+        #times = Lap.objects.aggregate(Sum('time'), Min('time'), Max('time'))
+
+        #aggregate(Avg('price'), Max('price'), Min('price'))
+
+        #bundle.data['time_n-1'] = times['time__sum']-times['time__min']
+        #bundle.data['time_best'] = times['time__max']
+
+        _n_1 = 0
+        _max = 0
+        times = bundle.obj.laps.all().aggregate(Sum('time'), Min('time'), Max('time'))
+        if times['time__min'] and times['time__max'] and times['time__sum']:
+            _n_1 += times['time__sum'] - times['time__min']
+            _max += times['time__max']
+        bundle.data['time_n-1'] = _n_1
+        bundle.data['time_best'] = _max
+
+        del bundle.data['id']
+        del bundle.data['trial']
+        return bundle
+
+    def alter_list_data_to_serialize(self, request, data_dict):
+        if isinstance(data_dict, dict):
+            if 'meta' in data_dict:
+                # Get rid of the "meta".
+                del (data_dict['meta'])
+                # Rename the objects.
+                data_dict['trial_driver'] = copy.copy(data_dict['objects'])
                 del (data_dict['objects'])
         return data_dict
 

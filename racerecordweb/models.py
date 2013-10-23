@@ -77,7 +77,7 @@ class Lap(models.Model):
     trial = models.ForeignKey(Trial, related_name='laps')
 
     def __unicode__(self):
-        return u'%d uzyska³ %s na %d przeje¼dzie' % (self.event_driver.start_number, self.time, self.lap_nr)
+        return u'%d uzyska³ %s na %d przeje¼dzie próby %s' % (self.event_driver.start_number, self.time, self.lap_nr, self.trial.name)
 
     def save(self, force_insert=False, force_update=False, using=None):
         create = TrialDriver.objects.get_or_create(start_number=self.event_driver.start_number, trial__id=self.trial.id,

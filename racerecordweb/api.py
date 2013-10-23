@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models import Min, Sum, Max
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
-from racerecordweb.models import Lap, Trial, Event, Driver, Car, EventDriver
+from racerecordweb.models import Lap, Trial, Event, Driver, Car, TrialDriver
 from tastypie.authorization import Authorization
 import copy
 
@@ -82,14 +82,14 @@ class CarResource(ModelResource):
         return data_dict
 
 
-class EventDriverResource(ModelResource):
+class TrialDriverResource(ModelResource):
     #laps = fields.ToManyField(LapResource, 'laps', related_name="lap", full=True, null=True)
     driver = fields.ForeignKey(DriverResource, 'driver', full=True, null=True)
     event = fields.ForeignKey(EventResource, 'event', full=True, null=True)
 
     class Meta:
-        queryset = EventDriver.objects.all()
-        resource_name = 'event_driver'
+        queryset = TrialDriver.objects.all()
+        resource_name = 'trial_driver'
         #excludes = ['id']
         include_resource_uri = False
         authorization = Authorization()
@@ -98,8 +98,8 @@ class EventDriverResource(ModelResource):
         }
 
     def dehydrate(self, bundle):
-        #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,
-        #                          event_driver__driver__id=bundle.obj.driver.id)
+        #laps = Lap.objects.filter(trial_driver__id=bundle.obj.id,
+        #                          trial_driver__driver__id=bundle.obj.driver.id)
         #times = Lap.objects.aggregate(Sum('time'), Min('time'), Max('time'))
 
         #aggregate(Avg('price'), Max('price'), Min('price'))
@@ -121,13 +121,13 @@ class EventDriverResource(ModelResource):
                 # Get rid of the "meta".
                 del (data_dict['meta'])
                 # Rename the objects.
-                data_dict['event_driver'] = copy.copy(data_dict['objects'])
+                data_dict['trial_driver'] = copy.copy(data_dict['objects'])
                 del (data_dict['objects'])
         return data_dict
 
 
 class LapResource(ModelResource):
-    event_driver = fields.ForeignKey(EventDriverResource, 'event_driver', related_name='laps')
+    trial_driver = fields.ForeignKey(TrialDriverResource, 'trial_driver', related_name='laps')
     #trial = fields.ForeignKey(Trial, 'trial', related_name='laps')
 
     class Meta:
@@ -143,10 +143,10 @@ class LapResource(ModelResource):
         bundle.data['time'] = int(
             (datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
         trial = Trial.objects.get(id=bundle.data['trial_id'])
-        event_driver = EventDriver.objects.get(event__id=bundle.data['event_id'],
+        trial_driver = TrialDriver.objects.get(event__id=bundle.data['event_id'],
                                                start_number=bundle.data['start_number'])
         #bundle.obj.lap_nr = bundle.data['lap_nr']
-        bundle.obj.event_driver = event_driver
+        bundle.obj.trial_driver = trial_driver
         bundle.obj.trial = trial
         del bundle.data['event_id']
         del bundle.data['trial_id']

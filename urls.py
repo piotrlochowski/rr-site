@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
 from tastypie.api import Api
-from racerecordweb.api import LapResource, TrialResource, EventDriverResource, EventResource, DriverResource
+from racerecordweb.api import LapResource, TrialResource, TrialDriverResource, EventResource, DriverResource
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -10,7 +10,7 @@ admin.autodiscover()
 #lap_resource = LapResource()
 
 v1_api = Api(api_name='v1')
-v1_api.register(EventDriverResource())
+v1_api.register(TrialDriverResource())
 v1_api.register(LapResource())
 v1_api.register(TrialResource())
 v1_api.register(EventResource())

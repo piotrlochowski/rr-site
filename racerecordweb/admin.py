@@ -17,8 +17,9 @@ from racerecordsite.racerecordweb import models
 #    #    # do something with self.cleaned_data['temp_id']
 #    #    super(DriverForm, self).save(commit=commit)
 
-class EventDriverInline(admin.TabularInline):
-    model = models.Event.drivers.through
+class TrialDriverInline(admin.TabularInline):
+    model = models.Trial.drivers.through
+
 
 class DriverAdmin(admin.ModelAdmin):
     pass
@@ -44,11 +45,11 @@ class LapInline(admin.TabularInline):
 class EventAdmin(admin.ModelAdmin):
     inlines = [
         TrialInline,
-        EventDriverInline,
+        TrialDriverInline,
     ]
 
 
-class EventDriveAdmin(admin.ModelAdmin):
+class TrialDriveAdmin(admin.ModelAdmin):
     inlines = [
         LapInline,
     ]
@@ -63,6 +64,6 @@ class TrialAdmin(admin.ModelAdmin):
 admin.site.register(models.Driver, DriverAdmin)
 admin.site.register(models.Car)
 admin.site.register(models.Trial, TrialAdmin)
-admin.site.register(models.EventDriver, EventDriveAdmin)
+admin.site.register(models.TrialDriver, TrialDriveAdmin)
 admin.site.register(models.Lap)
 admin.site.register(models.Event, EventAdmin)

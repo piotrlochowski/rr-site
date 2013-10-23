@@ -107,10 +107,13 @@ class EventDriverResource(ModelResource):
         #bundle.data['time_n-1'] = times['time__sum']-times['time__min']
         #bundle.data['time_best'] = times['time__max']
 
-        times = bundle.obj.laps.all().aggregate(Sum('time'), Min('time'), Max('time'))
+        for trial in bundle.obj.event.trials.all():
+            times = bundle.obj.laps.filter(trial__id=trial.id).aggregate(Sum('time'), Min('time'), Max('time'))
+            if times['time__min'] and times['time__max'] and times['time__sum']:
+                bundle.data['time_n-1'] = times['time__sum']-times['time__min']
+                bundle.data['time_best'] = times['time__max']
+                bundle.data['trials']='[{"trial_id":"1"},{"trial_id":"1"}]'
 
-        bundle.data['time_n-1'] = times['time__sum']-times['time__min']
-        bundle.data['time_best'] = times['time__max']
         del bundle.data['id']
         del bundle.data['event']
         return bundle

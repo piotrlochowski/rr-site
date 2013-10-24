@@ -149,6 +149,7 @@ class TrialDriverResource(ModelResource):
         filtering = {
             'trial': ALL_WITH_RELATIONS,
         }
+        ordering = {'time_n'}
 
     def dehydrate(self, bundle):
         #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,
@@ -166,7 +167,7 @@ class TrialDriverResource(ModelResource):
         if times['time__min'] and times['time__max'] and times['time__sum']:
             _n_1 += times['time__sum'] - times['time__min']
             _max += times['time__max']
-        bundle.data['time_n-1'] = _n_1
+        bundle.data['time_n_minus_1'] = _n_1
         bundle.data['time_n'] = _max
         bundle.data['first_name'] = bundle.obj.driver.first_name
         bundle.data['last_name'] = bundle.obj.driver.last_name

@@ -117,11 +117,15 @@ class EventDriverResource(ModelResource):
             if times['time__min'] and times['time__max'] and times['time__sum']:
                 _n_1 += times['time__sum'] - times['time__min']
                 _max += times['time__max']
-        bundle.data['time_n-1'] = _n_1
-        bundle.data['time_best'] = _max
+        bundle.data['time_n_minus_1'] = _n_1
+        bundle.data['time_n'] = _max
+        bundle.data['first_name'] = bundle.obj.driver.first_name
+        bundle.data['last_name'] = bundle.obj.driver.last_name
 
         del bundle.data['id']
+        del bundle.data['driver']
         del bundle.data['event']
+
         return bundle
 
     def alter_list_data_to_serialize(self, request, data_dict):

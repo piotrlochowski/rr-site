@@ -206,8 +206,8 @@ class LapResource(ModelResource):
 
     def hydrate(self, bundle):
         (min, sec, msec) = [int(t) for t in bundle.data['time'].split(':')]
-        bundle.data['time'] = int(
-            (datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
+        bundle.data['time'] = int((min*60+sec)*1000+msec)
+            #(datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
         trial = Trial.objects.get(id=bundle.data['trial_id'])
         event_driver = EventDriver.objects.get(event__id=bundle.data['event_id'],
                                                start_number=bundle.data['start_number'])

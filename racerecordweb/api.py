@@ -1,4 +1,3 @@
-import datetime
 from django.contrib.auth.models import User
 from django.db.models import Min, Sum, Max
 from tastypie import fields
@@ -140,14 +139,12 @@ class EventDriverResource(ModelResource):
 
 
 class TrialDriverResource(ModelResource):
-    #laps = fields.ToManyField(LapResource, 'laps', related_name="lap", full=True, null=True)
     driver = fields.ForeignKey(DriverResource, 'driver', full=True, null=True)
     trial = fields.ForeignKey(TrialResource, 'trial', full=True, null=True)
 
     class Meta:
         queryset = TrialDriver.objects.all()
         resource_name = 'trial_driver'
-        #excludes = ['id', 'driver']
         include_resource_uri = False
         authorization = Authorization()
         filtering = {
@@ -207,11 +204,9 @@ class LapResource(ModelResource):
     def hydrate(self, bundle):
         (min, sec, msec) = [int(t) for t in bundle.data['time'].split(':')]
         bundle.data['time'] = int((min*60+sec)*1000+msec)
-            #(datetime.timedelta(minutes=min, seconds=sec, milliseconds=msec)).total_seconds() * 1000)
         trial = Trial.objects.get(id=bundle.data['trial_id'])
         event_driver = EventDriver.objects.get(event__id=bundle.data['event_id'],
                                                start_number=bundle.data['start_number'])
-        #bundle.obj.lap_nr = bundle.data['lap_nr']
         bundle.obj.event_driver = event_driver
         bundle.obj.trial = trial
         del bundle.data['event_id']
@@ -228,19 +223,3 @@ class LapResource(ModelResource):
                 data_dict['laps'] = copy.copy(data_dict['objects'])
                 del (data_dict['objects'])
         return data_dict
-
-#class LocationResource(ModelResource):
-#    class Meta:
-#        queryset = Location.objects.all();
-#        resource_name = 'location'
-#        include_resource_uri = False
-#
-#    def alter_list_data_to_serialize(self, request, data_dict):
-#        if isinstance(data_dict, dict):
-#            if 'meta' in data_dict:
-#                # Get rid of the "meta".
-#                del(data_dict['meta'])
-#                # Rename the objects.
-#                data_dict['locations'] = copy.copy(data_dict['objects'])
-#                del(data_dict['objects'])
-#        return data_dict

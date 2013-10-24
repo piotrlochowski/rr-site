@@ -130,7 +130,7 @@ class EventDriverResource(ModelResource):
                 # Get rid of the "meta".
                 del (data_dict['meta'])
                 # Rename the objects.
-                data_dict['event_driver'] = copy.copy(data_dict['objects'])
+                data_dict['event_drivers'] = copy.copy(data_dict['objects'])
                 del (data_dict['objects'])
         return data_dict
 
@@ -143,7 +143,7 @@ class TrialDriverResource(ModelResource):
     class Meta:
         queryset = TrialDriver.objects.all()
         resource_name = 'trial_driver'
-        #excludes = ['id']
+        #excludes = ['id', 'driver']
         include_resource_uri = False
         authorization = Authorization()
         filtering = {
@@ -167,9 +167,13 @@ class TrialDriverResource(ModelResource):
             _n_1 += times['time__sum'] - times['time__min']
             _max += times['time__max']
         bundle.data['time_n-1'] = _n_1
-        bundle.data['time_best'] = _max
+        bundle.data['time_n'] = _max
+        bundle.data['first_name'] = bundle.obj.driver.first_name
+        bundle.data['last_name'] = bundle.obj.driver.last_name
+        bundle.data['trial_id'] = bundle.obj.trial.id
 
         del bundle.data['id']
+        del bundle.data['driver']
         del bundle.data['trial']
         return bundle
 
@@ -179,7 +183,7 @@ class TrialDriverResource(ModelResource):
                 # Get rid of the "meta".
                 del (data_dict['meta'])
                 # Rename the objects.
-                data_dict['trial_driver'] = copy.copy(data_dict['objects'])
+                data_dict['trial_drivers'] = copy.copy(data_dict['objects'])
                 del (data_dict['objects'])
         return data_dict
 

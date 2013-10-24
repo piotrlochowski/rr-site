@@ -153,7 +153,6 @@ class TrialDriverResource(ModelResource):
         filtering = {
             'trial': ALL_WITH_RELATIONS,
         }
-        ordering = {'time_n'}
 
     def dehydrate(self, bundle):
         #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,

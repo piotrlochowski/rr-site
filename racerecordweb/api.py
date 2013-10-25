@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db.models import Min, Sum, Max
+from django.db.models.aggregates import Count
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from racerecordweb.models import Lap, Trial, Event, Driver, Car, EventDriver, TrialDriver
@@ -110,14 +111,17 @@ class EventDriverResource(ModelResource):
         #bundle.data['time_best'] = times['time__max']
 
         _n_1 = 0
-        _max = 0
+        _min = 0
+        _laps = 0
         for trial in bundle.obj.event.trials.all():
-            times = bundle.obj.laps.filter(trial__id=trial.id).aggregate(Sum('time'), Min('time'), Max('time'))
+            times = bundle.obj.laps.filter(trial__id=trial.id).aggregate(Sum('time'), Min('time'), Max('time'), Count('time'))
             if times['time__min'] and times['time__max'] and times['time__sum']:
-                _n_1 += times['time__sum'] - times['time__min']
-                _max += times['time__max']
+                _n_1 += times['time__sum'] - times['time__max']
+                _min += times['time__min']
+                _laps += times['time__count']
+        bundle.data['laps'] = _laps
         bundle.data['time_n_minus_1'] = _n_1
-        bundle.data['time_n'] = _max
+        bundle.data['time_n'] = _min
         bundle.data['first_name'] = bundle.obj.driver.first_name
         bundle.data['last_name'] = bundle.obj.driver.last_name
 
@@ -162,13 +166,14 @@ class TrialDriverResource(ModelResource):
         #bundle.data['time_best'] = times['time__max']
 
         _n_1 = 0
-        _max = 0
-        times = bundle.obj.laps.all().aggregate(Sum('time'), Min('time'), Max('time'))
+        _min = 0
+        times = bundle.obj.laps.all().aggregate(Sum('time'), Min('time'), Max('time'), Count('time'))
         if times['time__min'] and times['time__max'] and times['time__sum']:
-            _n_1 += times['time__sum'] - times['time__min']
-            _max += times['time__max']
+            _n_1 += times['time__sum'] - times['time__max']
+            _min += times['time__min']
+        bundle.data['laps'] = times['time__count']
         bundle.data['time_n_minus_1'] = _n_1
-        bundle.data['time_n'] = _max
+        bundle.data['time_n'] = _min
         bundle.data['first_name'] = bundle.obj.driver.first_name
         bundle.data['last_name'] = bundle.obj.driver.last_name
         bundle.data['trial_id'] = bundle.obj.trial.id

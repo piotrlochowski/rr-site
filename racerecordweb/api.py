@@ -183,6 +183,8 @@ class TrialDriverResource(ModelResource):
         bundle.data['first_name'] = bundle.obj.driver.first_name
         bundle.data['last_name'] = bundle.obj.driver.last_name
         bundle.data['trial_id'] = bundle.obj.trial.id
+        bundle.data['all_laps'] = bundle.obj.laps.all()
+
 
         del bundle.data['id']
         del bundle.data['driver']

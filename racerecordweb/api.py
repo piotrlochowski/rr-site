@@ -113,6 +113,9 @@ class EventDriverResource(ModelResource):
                 _laps += times['time__count']
                 _sum += times['time__sum']
 
+        for index, lap in enumerate(bundle.obj.laps.all()):
+            bundle.data['lap_%s' % index] = lap.time
+
         bundle.data['laps'] = _laps
         bundle.data['time_n_minus_1'] = _n_1
         bundle.data['time_sum'] = _sum

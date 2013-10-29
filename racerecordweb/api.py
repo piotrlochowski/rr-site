@@ -101,15 +101,6 @@ class EventDriverResource(ModelResource):
         }
 
     def dehydrate(self, bundle):
-        #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,
-        #                          event_driver__driver__id=bundle.obj.driver.id)
-        #times = Lap.objects.aggregate(Sum('time'), Min('time'), Max('time'))
-
-        #aggregate(Avg('price'), Max('price'), Min('price'))
-
-        #bundle.data['time_n-1'] = times['time__sum']-times['time__min']
-        #bundle.data['time_best'] = times['time__max']
-
         _n_1 = 0
         _min = 0
         _laps = 0
@@ -121,6 +112,7 @@ class EventDriverResource(ModelResource):
                 _min += times['time__min']
                 _laps += times['time__count']
                 _sum += times['time__sum']
+
         bundle.data['laps'] = _laps
         bundle.data['time_n_minus_1'] = _n_1
         bundle.data['time_sum'] = _sum
@@ -159,15 +151,6 @@ class TrialDriverResource(ModelResource):
         }
 
     def dehydrate(self, bundle):
-        #laps = Lap.objects.filter(event_driver__id=bundle.obj.id,
-        #                          event_driver__driver__id=bundle.obj.driver.id)
-        #times = Lap.objects.aggregate(Sum('time'), Min('time'), Max('time'))
-
-        #aggregate(Avg('price'), Max('price'), Min('price'))
-
-        #bundle.data['time_n-1'] = times['time__sum']-times['time__min']
-        #bundle.data['time_best'] = times['time__max']
-
         _n_1 = 0
         _min = 0
         _sum = 0
@@ -176,8 +159,10 @@ class TrialDriverResource(ModelResource):
             _n_1 += times['time__sum'] - times['time__max']
             _sum += times['time__sum']
             _min += times['time__min']
+
         for index, lap in enumerate(bundle.obj.laps.all()):
             bundle.data['lap_%s' % index] = lap.time
+
         bundle.data['laps'] = times['time__count']
         bundle.data['time_n_minus_1'] = _n_1
         bundle.data['time_n'] = _min
@@ -185,8 +170,6 @@ class TrialDriverResource(ModelResource):
         bundle.data['first_name'] = bundle.obj.driver.first_name
         bundle.data['last_name'] = bundle.obj.driver.last_name
         bundle.data['trial_id'] = bundle.obj.trial.id
-        bundle.data['all_laps'] = bundle.obj.laps.all()
-
 
         del bundle.data['id']
         del bundle.data['driver']

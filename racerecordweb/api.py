@@ -177,7 +177,7 @@ class TrialDriverResource(ModelResource):
             _sum += times['time__sum']
             _min += times['time__min']
         for index, lap in enumerate(bundle.obj.laps.all()):
-            bundle.data['lap_%d' % index+1] = lap.time
+            bundle.data['lap_%s' % index] = lap.time
         bundle.data['laps'] = times['time__count']
         bundle.data['time_n_minus_1'] = _n_1
         bundle.data['time_n'] = _min
